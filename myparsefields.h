@@ -18,8 +18,8 @@ private:
         QStringList leftWords;
         QStringList rightWords;
 
-        leftWords << "МБОУ" << "МОБУ" << "МОУ" << "МКОУ" << "МАОУ" << "";
-        rightWords << "СОШ" << "средняя" << "гимназия" << "лицей" << "школа";
+        leftWords << "МБОУ" << "МОБУ" << "МОУ" << "МКОУ" << "МАОУ";
+        rightWords << "СОШ" << "ООШ" << "средняя" << "гимназия" << "лицей" << "школа";
 
         QStringList words = text.split(" ");
 
@@ -39,6 +39,7 @@ public:
     {
         QMap < QString , QString > pairs;
 
+        pairs["ООШ"] = "школа";
         pairs["СОШ"] = "школа";
         pairs["школа"] = "школа";
         pairs["гимназия"] = "гимназия";
@@ -56,8 +57,6 @@ public:
             if (text.indexOf(it.key(), 0, Qt::CaseInsensitive) != -1)
                 tags << it.value();
         }
-
-
 
         QString schoolNumber = QRegularExpression("[№](\\s*)([0-9]+)").match(text).captured(2);
 
