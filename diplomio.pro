@@ -21,7 +21,6 @@ SOURCES += main.cpp\
     myxmltreeelement.cpp \
     myxmltreeitem.cpp \
     myparsefields.cpp \
-    myschoolsdata.cpp \
     myschool.cpp
 
 HEADERS  += mainwindow.h \
@@ -32,7 +31,6 @@ HEADERS  += mainwindow.h \
     myxmltreeelement.h \
     myxmltreeitem.h \
     myparsefields.h \
-    myschoolsdata.h \
     myschool.h
 
 FORMS    += mainwindow.ui

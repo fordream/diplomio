@@ -13,7 +13,7 @@ class MyParseFields
 private:
     QString getSchoolName(QString text)
     {
-        text = text.replace("\"", "");
+        text = text.replace("\"", " ").replace("«", " ").replace("»", " ");
 
         QStringList leftWords;
         QStringList rightWords;
@@ -27,7 +27,12 @@ private:
             return "";
 
         if (leftWords.contains(words[0]) && rightWords.contains(words[2]))
-            return words[1];
+        {
+            QStringList tags = getTagsForSchool(words[2]);
+
+            if (tags.length() > 0 && tags[0] == "школа")
+                return words[1];
+        }
 
         return "";
     }

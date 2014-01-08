@@ -3,9 +3,7 @@
 #include <QDebug>
 #include "myopenworkbook.h"
 #include "myparsefields.h"
-#include "myschoolsdata.h"
-#include <QSqlQueryModel>
-#
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)

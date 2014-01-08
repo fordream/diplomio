@@ -6,7 +6,6 @@
 #include <QStandardItemModel>
 #include "myopenworkbook.h"
 #include <QListWidgetItem>
-#include "myschoolsdata.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,7 +37,6 @@ private:
     MyOpenWorkbook <MySchoolboy> *excel;
     MyOpenWorkbook <MySchool> *excel2;
     Ui::MainWindow *ui;
-    MySchoolsData schoolsData;
 
     void updateList(int index);
 };
