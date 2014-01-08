@@ -131,11 +131,5 @@ void MainWindow::on_pushButton_2_clicked()
         item->setCheckState(Qt::Unchecked);
     }
 
-
-    QSqlQueryModel *model = new QSqlQueryModel;
-         model->setQuery("SELECT id, value FROM tags");
-         model->setHeaderData(0, Qt::Horizontal, tr("Id"));
-         model->setHeaderData(1, Qt::Horizontal, tr("Tag"));
-
          ui->tableView->setModel(model);
 }

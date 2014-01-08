@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml
+QT       += core gui xml sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     mysimplexmlreader.cpp \
     myxmlcontenthandler.cpp \
     myxmltreeelement.cpp \
-    myxmltreeitem.cpp
+    myxmltreeitem.cpp \
+    myparsefields.cpp \
+    myschoolsdata.cpp
 
 HEADERS  += mainwindow.h \
     myopenworkbook.h \
@@ -27,6 +29,8 @@ HEADERS  += mainwindow.h \
     mysimplexmlreader.h \
     myxmlcontenthandler.h \
     myxmltreeelement.h \
-    myxmltreeitem.h
+    myxmltreeitem.h \
+    myparsefields.h \
+    myschoolsdata.h
 
 FORMS    += mainwindow.ui

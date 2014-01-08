@@ -5,6 +5,8 @@
 #include <QStandardItemModel>
 #include "myopenworkbook.h"
 #include <QListWidgetItem>
+#include "myschoolsdata.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -26,10 +28,15 @@ private slots:
 
     void on_listWidget_clicked(const QModelIndex &index);
 
+    void on_listWidget_activated(const QModelIndex &index);
+
+    void on_pushButton_2_clicked();
+
 private:
     QStandardItemModel *model;
      MyOpenWorkbook *excel;
     Ui::MainWindow *ui;
+    MySchoolsData schoolsData;
 
     void updateList(int index);
 };
