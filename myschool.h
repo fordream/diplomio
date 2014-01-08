@@ -1,19 +1,19 @@
-#ifndef MYSCHOOLBOY_H
-#define MYSCHOOLBOY_H
+#ifndef MYSCHOOL_H
+#define MYSCHOOL_H
 #include <QString>
 #include <QStringList>
 
-class MySchoolboy
+class MySchool
 {
 public:
-    enum Field {Name, Locality, School, Level};
-    static const int FieldsCount = 4;
+    enum Field {School, Locality, Template};
+    static const int FieldsCount = 3;
 
 private:
     QString fields[FieldsCount];
 
 public:
-    MySchoolboy();
+    MySchool();
 
     void setField(Field field, const QString &value);
 
@@ -31,5 +31,4 @@ public:
 
     QString toQString() const;
 };
-
-#endif // MYSCHOOLBOY_H
+#endif // MYSCHOOL_H

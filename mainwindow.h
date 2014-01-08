@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "myschool.h"
 #include <QStringListModel>
 #include <QMainWindow>
 #include <QStandardItemModel>
@@ -34,7 +35,8 @@ private slots:
 
 private:
     QStandardItemModel *model;
-     MyOpenWorkbook *excel;
+    MyOpenWorkbook <MySchoolboy> *excel;
+    MyOpenWorkbook <MySchool> *excel2;
     Ui::MainWindow *ui;
     MySchoolsData schoolsData;
 
