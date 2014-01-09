@@ -40,8 +40,50 @@ private:
 public:
     MyParseFields();
 
+    QStringList checkIsSoldats(const QString &text)
+    {
+        QStringList tags;
+        QStringList names;
+
+        names << "Кедровый" << "Ачинский" << "Канский" << "Красноярский" << "Лесосибирский" << "Минусинский" << "Норильский" << "Шарыповский";
+
+        if (text.contains("кадетский", Qt::CaseInsensitive) && text.contains("корпус", Qt::CaseInsensitive))
+        {
+            foreach (QString name, names)
+                if (text.contains(name, Qt::CaseInsensitive))
+                {
+                    tags << name + " кадетский корпус";
+                    break;
+                }
+        }
+
+        if (tags.length() != 0)
+            return tags;
+
+        names.clear();
+        names << "Ачинская" << "Красноярская";
+
+        if (text.contains("Мариинская", Qt::CaseInsensitive) && text.contains("гимназия", Qt::CaseInsensitive))
+        {
+            foreach (QString name, names)
+            {
+                if (text.contains(name, Qt::CaseInsensitive))
+                {
+                    tags << name + " Мариинская гимназия";
+                }
+            }
+        }
+
+        return tags;
+    }
+
     QStringList getTagsForSchool(const QString &text)
     {
+        QStringList tags = checkIsSoldats(text.toLower().replace("мжги", "Мариинская женская гимназия-интернат"));
+
+        if (tags.length() != 0)
+            return tags;
+
         QMap < QString , QString > pairs;
 
         pairs["ООШ"] = "школа";
@@ -52,10 +94,6 @@ public:
         pairs["КУГ"] = "гимназия";
         pairs["МУК"] = "МУК";
         pairs["ЦО"] = "ЦО";
-        pairs["кадетский"] = "кадетский";
-        pairs["Мариинская"] = "Мариинская";
-
-        QStringList tags;
 
         for (QMap < QString , QString >::const_iterator it = pairs.constBegin(); it != pairs.constEnd(); ++it)
         {
