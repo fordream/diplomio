@@ -30,6 +30,26 @@ public:
     }
 
     QString toQString() const;
+
+    QString getName() const
+    {
+        return fields[Name];
+    }
+
+    QString getLocality() const
+    {
+        return fields[Locality];
+    }
+
+    QString getSchool() const
+    {
+        return fields[School];
+    }
+
+    QString getLevel() const
+    {
+        return fields[Level];
+    }
 };
 
 #endif // MYSCHOOLBOY_H

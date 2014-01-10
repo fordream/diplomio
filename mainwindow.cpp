@@ -21,6 +21,24 @@ MainWindow::MainWindow(QWidget *parent) :
     subjects << "английскому языку (14.01.2014)";
     subjects << "астрономии (14.01.2014)";
     subjects << "мировой художественной культуре (15.01.2014)";
+    subjects << "французскому языку (17.01.2014)";
+    subjects << "географии (18.01.2014)";
+    subjects << "физике (20.01.2014)";
+    subjects << "русскому языку (20.01.2014)";
+    subjects << "биологии (22.01.2014)";
+    subjects << "истории (23.01.2014)";
+    subjects << "основая безопасности жизнедеятельности (24.01.2014)";
+    subjects << "обществознанию (27.01.2014)";
+    subjects << "литературе (28.01.2014)";
+    subjects << "праву (29.01.2014)";
+    subjects << "химии (31.01.2014)";
+    subjects << "физической культуре (01.02.2014)";
+    subjects << "информатике и ИКТ (03.02.2014)";
+    subjects << "математике (05.02.2014)";
+    subjects << "экологии (07.02.2014)";
+    subjects << "немецкому языку (07.02.2014)";
+    subjects << "технологии (08.02.2014)";
+    subjects << "экономике (08.02.2014)";
 
     ui->comboBox_2->addItems(subjects);
 }
@@ -78,9 +96,9 @@ MySchool MainWindow::getSchoolByTags(QStringList tags)
 
     foreach (MySchool school, schools)
     {
-        QStringList schoolTags = parse.getTagsForSchool(school.getField(MySchool::School));
+        QStringList schoolTags = parse.getTagsForSchool(school.getSchool());
 
-        schoolTags << parse.getTagForLocality(school.getField(MySchool::Locality));
+        schoolTags << parse.getTagForLocality(school.getLocality());
         schoolTags.sort();
 
         if (tags == schoolTags)
@@ -94,21 +112,21 @@ QMap<QString, QString> MainWindow::prepareBoyForPrint(MySchoolboy boy)
 {
     QMap < QString , QString > result;
     MyParseFields parse;
-    QStringList tags = parse.getTagsForName(boy.getField(MySchoolboy::Name));
+    QStringList tags = parse.getTagsForName(boy.getName());
 
     result["surname"] = tags[0];
     result["middlename"] = tags[2];
     result["name"] = tags[1];
-    result["level"] = boy.getField(MySchoolboy::Level);
+    result["level"] = boy.getLevel();
 
-    tags = parse.getTagsForSchool(boy.getField(MySchoolboy::School));
-    tags << parse.getTagForLocality(boy.getField(MySchoolboy::Locality));
+    tags = parse.getTagsForSchool(boy.getSchool());
+    tags << parse.getTagForLocality(boy.getLocality());
 
     foreach (QString tag, tags)
         result["tags"] += "[" + tag + "] ";
 
     MySchool school = getSchoolByTags(tags);
-    QStringList lines = school.getField(MySchool::Template).split("$");
+    QStringList lines = school.getTemplate().split("$");
 
     result["school"] = school.toQString();
 
@@ -122,6 +140,9 @@ QMap<QString, QString> MainWindow::prepareBoyForPrint(MySchoolboy boy)
     QStringList months;
 
     months << "января" << "февраля" << "марта" << "апреля" << "мая" << "июня" << "июля" << "августа" << "сентября" << "октября" << "ноября" << "декабря";
+
+    if (subjectList[2][0] == '0')
+        subjectList[2] = subjectList[2].remove(0, 1);
 
     result["subject"] = subjectList[1].simplified();
     result["day"] = subjectList[2];
@@ -230,7 +251,10 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
 
 void MainWindow::on_listWidget_currentRowChanged(int currentRow)
 {
-    MySchoolboy boy = excelBoys->getBoyFromTabData(ui->comboBox->currentIndex(), currentRow);
+    MySchoolboy boy;
+
+    if (currentRow != -1)
+        boy = excelBoys->getBoyFromTabData(ui->comboBox->currentIndex(), currentRow);
 
     showReport(boy);
 }

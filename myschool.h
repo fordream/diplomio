@@ -30,5 +30,20 @@ public:
     }
 
     QString toQString() const;
+
+    QString getSchool() const
+    {
+        return fields[School];
+    }
+
+    QString getLocality() const
+    {
+        return fields[Locality];
+    }
+
+    QString getTemplate() const
+    {
+        return fields[Template];
+    }
 };
 #endif // MYSCHOOL_H
