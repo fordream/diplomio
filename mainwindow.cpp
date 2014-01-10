@@ -4,10 +4,12 @@
 #include "myopenworkbook.h"
 #include "myparsefields.h"
 #include <QFileDialog>
+#include <QTextStream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     schoolsFile("db.xlsx"),
+    templateFile("template.ods"),
     reportsFolder("done"),
     excelBoys(NULL),
     ui(new Ui::MainWindow)
@@ -21,8 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     subjects << "мировой художественной культуре (15.01.2014)";
 
     ui->comboBox_2->addItems(subjects);
-
-    prepareReportsFolder();
 }
 
 MainWindow::~MainWindow()
@@ -53,6 +53,8 @@ void MainWindow::on_pushButton_clicked()
     ui->pushButton->setEnabled(false);
     ui->pushButton_2->setEnabled(true);
     ui->comboBox->addItems(excelBoys->getTabNames());
+
+    prepareReportsFolder();
 }
 
 void MainWindow::updateList(int index)
@@ -169,10 +171,55 @@ void MainWindow::prepareReportsFolder()
     if (dir.cd(reportsFolder))
         dir.removeRecursively();
 
-    dir.refresh();
-    qDebug() << dir.currentPath();
-
+    dir = QDir();
     dir.mkdir(reportsFolder);
+    dir.cd(reportsFolder);
+
+    QStringList tabs = excelBoys->getTabNames();
+
+    foreach (QString tab, tabs)
+        dir.mkdir(tab);
+}
+
+void MainWindow::processSelectedBoyForPrint(const MySchoolboy &boy)
+{
+    QTemporaryDir tempDir;
+
+    QString program("unzip");
+    QStringList arguments;
+
+    arguments << templateFile;
+    arguments << "-d";
+    arguments << tempDir.path();
+
+    QProcess *process = new QProcess();
+
+    process->execute(program, arguments);
+
+    QMap < QString , QString > report = prepareBoyForPrint(boy);
+    QFile file(tempDir.path() + "/content.xml");
+
+    file.open(QFile::ReadOnly);
+
+    QString text = QTextStream(&file).readAll();
+
+    for (QMap < QString , QString >::const_iterator it = report.constBegin(); it != report.constEnd(); ++it)
+        text = text.replace("%%" + it.key() + "%%", it.value());
+
+    file.close();
+    file.open(QFile::WriteOnly | QFile::Truncate);
+
+    QTextStream out(&file);
+
+    out << text;
+    file.close();
+
+    QString outputFilename = QString("%1 %2 %3.ods").arg(report["surname"], report["name"], report["middlename"]);
+    QString outputFile = QString("%1/%2/%3/%4").arg(QDir::currentPath(), reportsFolder, ui->comboBox->currentText(), outputFilename);
+
+    process->execute("sh", QStringList() << "-c" << "cd " + tempDir.path() + " && zip -r \"" + outputFile + "\" .");
+
+    delete process;
 }
 
 void MainWindow::on_comboBox_currentIndexChanged(int index)
@@ -195,5 +242,11 @@ void MainWindow::on_pushButton_3_clicked()
 
 void MainWindow::on_pushButton_2_clicked()
 {
+    for (int i = 0; i < ui->listWidget->count(); ++i)
+    {
+        QListWidgetItem *item = ui->listWidget->item(i);
 
+        if (item->checkState() == Qt::Checked)
+            processSelectedBoyForPrint(excelBoys->getBoyFromTabData(ui->comboBox->currentIndex(), i));
+    }
 }
