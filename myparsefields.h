@@ -37,9 +37,6 @@ private:
         return "";
     }
 
-public:
-    MyParseFields();
-
     QStringList checkIsSoldats(const QString &text)
     {
         QStringList tags;
@@ -52,7 +49,7 @@ public:
             foreach (QString name, names)
                 if (text.contains(name, Qt::CaseInsensitive))
                 {
-                    tags << name + " кадетский корпус";
+                    tags << name << "кадетский корпус";
                     break;
                 }
         }
@@ -69,13 +66,16 @@ public:
             {
                 if (text.contains(name, Qt::CaseInsensitive))
                 {
-                    tags << name + " Мариинская гимназия";
+                    tags << name << "Мариинская гимназия";
                 }
             }
         }
 
         return tags;
     }
+
+public:
+    MyParseFields();
 
     QStringList getTagsForSchool(const QString &text)
     {
@@ -114,10 +114,9 @@ public:
         return tags;
     }
 
-    QString getTagForLocality (const QString &text)
+    QString getTagForLocality(const QString &text)
     {
         QString myText = text;
-
         QMap < QString , QString > pairs;
 
         pairs["г."] = "город ";
@@ -151,6 +150,24 @@ public:
             return "ЗАТО " + words[1];
 
         return "";
+    }
+
+    QStringList getTagsForName(const QString &text)
+    {
+        QStringList tags = text.simplified().split(" ");
+
+        while (tags.length() > 3)
+        {
+            QString s = tags.back();
+
+            tags.pop_back();
+            tags.back() += " " + s;
+        }
+
+        while (tags.length() < 3)
+            tags << "";
+
+        return tags;
     }
 };
 

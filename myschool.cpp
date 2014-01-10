@@ -17,5 +17,8 @@ QString MySchool::getField(Field field) const
 
 QString MySchool::toQString() const
 {
-    return QString("%1, %2 [%3]").arg(fields[School], fields[Template], fields[Locality]);
+    if (fields[School] == "" || fields[Locality] == "")
+        return "";
+    else
+        return QString("%1, %2").arg(fields[School], fields[Locality]);
 }

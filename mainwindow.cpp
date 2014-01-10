@@ -3,50 +3,40 @@
 #include <QDebug>
 #include "myopenworkbook.h"
 #include "myparsefields.h"
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    schoolsFile("db.xlsx"),
+    reportsFolder("done"),
+    excelBoys(NULL),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
+    QStringList subjects;
+
+    subjects << "английскому языку (14.01.2014)";
+    subjects << "астрономии (14.01.2014)";
+    subjects << "мировой художественной культуре (15.01.2014)";
+
+    ui->comboBox_2->addItems(subjects);
+
+    prepareReportsFolder();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete excel;
+
+    if (excelBoys)
+        delete excelBoys;
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-/*    QListWidgetItem *item = new QListWidgetItem("ewe", ui->listWidget);
+    loadSchools();
 
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(Qt::Unchecked);
-
-
-    ui->comboBox->addItem("fsdffadsdfsd");
-
-    for (int i = 0; i < ui->listWidget->count(); ++i)
-    {
-        QListWidgetItem *item = ui->listWidget->item(i);
-        qDebug() << item->flags() << Qt::Checked << item->text() << item->checkState();
-    }*/
-    ui->listWidget->clear();
-    ui->comboBox->clear();
-    ui->pushButton->setEnabled(false);
-
-    /*
-        this->features[0] << "ФИО" << "Фамилия имя отчество";
-        this->features[1] << "Муниципалитет" << "Район, село" << "Город";
-        this->features[2] << "Школа" << "Учебное заведение";
-        this->features[3] << "Класс";
-
-        this->features[0] << "Название" << "Сокращенное название";
-        this->features[1] << "Муниципалитет" << "Район, село" << "Город";
-        this->features[2] << "Шаблон";
-     * */
     QVector < QStringList > features;
 
     features.resize(4);
@@ -55,36 +45,21 @@ void MainWindow::on_pushButton_clicked()
     features[2] << "Школа" << "Учебное заведение";
     features[3] << "Класс";
 
-    excel = new MyOpenXlsx < MySchoolboy > (QDir::currentPath() + "/file2.xlsx", new MyOpenWorkbookHelper<MySchoolboy>(features));
+    excelBoys = new MyOpenXlsx < MySchoolboy > (QFileDialog::getOpenFileName(this, "Файл итогового протокола", QDir::currentPath(), "Microsoft Excel 2010 (*.xlsx)"), new MyOpenWorkbookHelper<MySchoolboy>(features));
 
-    features[0].clear();
-    features[1].clear();
-    features[2].clear();
-
-    features[0] << "Название" << "Сокращенное название";
-    features[1] << "Муниципалитет" << "Район, село" << "Город";
-    features[2] << "Шаблон";
-
-    features.pop_back();
-
-
-
-    excel2 = new MyOpenXlsx < MySchool > (QDir::currentPath() + "/bd.xlsx", new MyOpenWorkbookHelper<MySchool>(features));
     ui->listWidget->setEnabled(true);
     ui->comboBox->setEnabled(true);
-
-    QStringList list = excel2->getTabNames();
-
-    ui->comboBox->addItems(list);
-
-
+    ui->comboBox_2->setEnabled(true);
+    ui->pushButton->setEnabled(false);
+    ui->pushButton_2->setEnabled(true);
+    ui->comboBox->addItems(excelBoys->getTabNames());
 }
 
 void MainWindow::updateList(int index)
 {
-    QVector < MySchool > v = excel2->getTabData(index);
+    QVector < MySchoolboy > v = excelBoys->getTabData(index);
 
-    foreach (MySchool boy, v)
+    foreach (MySchoolboy boy, v)
     {
         QListWidgetItem *item = new QListWidgetItem(boy.toQString(), ui->listWidget);
 
@@ -93,62 +68,129 @@ void MainWindow::updateList(int index)
     }
 }
 
+MySchool MainWindow::getSchoolByTags(QStringList tags)
+{
+    MyParseFields parse;
+
+    tags.sort();
+
+    foreach (MySchool school, schools)
+    {
+        QStringList schoolTags = parse.getTagsForSchool(school.getField(MySchool::School));
+
+        schoolTags << parse.getTagForLocality(school.getField(MySchool::Locality));
+        schoolTags.sort();
+
+        if (tags == schoolTags)
+            return school;
+    }
+
+    return MySchool();
+}
+
+QMap<QString, QString> MainWindow::prepareBoyForPrint(MySchoolboy boy)
+{
+    QMap < QString , QString > result;
+    MyParseFields parse;
+    QStringList tags = parse.getTagsForName(boy.getField(MySchoolboy::Name));
+
+    result["surname"] = tags[0];
+    result["middlename"] = tags[2];
+    result["name"] = tags[1];
+    result["level"] = boy.getField(MySchoolboy::Level);
+
+    tags = parse.getTagsForSchool(boy.getField(MySchoolboy::School));
+    tags << parse.getTagForLocality(boy.getField(MySchoolboy::Locality));
+
+    foreach (QString tag, tags)
+        result["tags"] += "[" + tag + "] ";
+
+    MySchool school = getSchoolByTags(tags);
+    QStringList lines = school.getField(MySchool::Template).split("$");
+
+    result["school"] = school.toQString();
+
+    while (lines.length() < 5)
+        lines << "";
+
+    for (int i = 0; i < lines.length(); ++i)
+        result["line_" + QString::number(i)] = lines[i];
+
+    QStringList subjectList = QRegularExpression("(.*)\\((\\d{2})\\.(\\d{2})\\.20(\\d{2})\\)").match(ui->comboBox_2->currentText()).capturedTexts();
+    QStringList months;
+
+    months << "января" << "февраля" << "марта" << "апреля" << "мая" << "июня" << "июля" << "августа" << "сентября" << "октября" << "ноября" << "декабря";
+
+    result["subject"] = subjectList[1].simplified();
+    result["day"] = subjectList[2];
+    result["month"] = months[subjectList[3].toInt() - 1];
+    result["year"] = subjectList[4];
+
+    return result;
+}
+
+void MainWindow::showReport(const MySchoolboy &boy)
+{
+    QMap < QString , QString > report =  prepareBoyForPrint(boy);
+
+    ui->label->setText(report["tags"]);
+    ui->label_2->setText(report["school"]);
+    ui->lineEdit->setText(report["surname"]);
+    ui->lineEdit_2->setText(report["name"]);
+    ui->lineEdit_3->setText(report["middlename"]);
+    ui->lineEdit_4->setText(report["level"]);
+    ui->lineEdit_5->setText(report["line_0"]);
+    ui->lineEdit_6->setText(report["line_1"]);
+    ui->lineEdit_7->setText(report["line_2"]);
+    ui->lineEdit_8->setText(report["line_3"]);
+    ui->lineEdit_9->setText(report["line_4"]);
+    ui->lineEdit_10->setText(report["day"]);
+    ui->lineEdit_11->setText(report["month"]);
+    ui->lineEdit_12->setText(report["year"]);
+    ui->lineEdit_13->setText(report["subject"]);
+}
+
+void MainWindow::loadSchools()
+{
+    QVector < QStringList > features;
+
+    features.resize(3);
+    features[0] << "Название" << "Сокращенное название";
+    features[1] << "Муниципалитет" << "Район, село" << "Город";
+    features[2] << "Шаблон";
+
+    schools = MyOpenXlsx < MySchool >(QDir::currentPath() + "/" + schoolsFile, new MyOpenWorkbookHelper<MySchool>(features)).getTabData(0);
+}
+
+void MainWindow::prepareReportsFolder()
+{
+    QDir dir;
+
+    if (dir.cd(reportsFolder))
+        dir.removeRecursively();
+
+    dir.refresh();
+    qDebug() << dir.currentPath();
+
+    dir.mkdir(reportsFolder);
+}
+
 void MainWindow::on_comboBox_currentIndexChanged(int index)
 {
     ui->listWidget->clear();
     updateList(index);
 }
 
-void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
-{/*
-    QString text = item->text();
-    QStringList l = text.split(" ");
-    ui->lineEdit->setText(l[0]);
-    ui->lineEdit_2->setText(l[1]);
-    ui->lineEdit_3->setText(l[2]);*/
+void MainWindow::on_listWidget_currentRowChanged(int currentRow)
+{
+    MySchoolboy boy = excelBoys->getBoyFromTabData(ui->comboBox->currentIndex(), currentRow);
+
+    showReport(boy);
 }
 
-void MainWindow::on_listWidget_clicked(const QModelIndex &index)
+void MainWindow::on_pushButton_3_clicked()
 {
-/*
-    MySchoolboy boy = excel->getBoyFromTabData(ui->comboBox->currentIndex(), index.row());
-
-    QStringList l = boy.getField(MySchoolboy::Name).split(" ");
-    ui->lineEdit->setText(l[0]);
-    ui->lineEdit_2->setText(l[1]);
-    ui->lineEdit_3->setText(l[2]);
-
-    MyParseFields parse;
-    QString label;
-    QStringList tags = parse.getTagsForSchool(boy.getField(MySchoolboy::School));
-
-    foreach (QString tag, tags)
-        label += "[" + tag + "] ";
-
-    ui->label->setText(label);
-    */
-}
-
-void MainWindow::on_listWidget_activated(const QModelIndex &index)
-{
-    MySchool boy = excel2->getBoyFromTabData(ui->comboBox->currentIndex(), index.row());
-/*
-    QStringList l = boy.getField(MySchoolboy::Name).split(" ");
-    ui->lineEdit->setText(l[0]);
-    ui->lineEdit_2->setText(l[1]);
-    ui->lineEdit_3->setText(l[2]);
-*/
-    MyParseFields parse;
-    QString label;
-//    QStringList tags = parse.getTagsForSchool(boy.getField(MySchoolboy::School));
-    QStringList tags = parse.getTagsForSchool(boy.getField(MySchool::School));
-
-    tags << parse.getTagForLocality(boy.getField(MySchool::Locality));
-
-    foreach (QString tag, tags)
-        label += "[" + tag + "] ";
-
-    ui->label->setText(label);
+    loadSchools();
 }
 
 void MainWindow::on_pushButton_2_clicked()

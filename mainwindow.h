@@ -6,6 +6,7 @@
 #include <QStandardItemModel>
 #include "myopenworkbook.h"
 #include <QListWidgetItem>
+#include <QMap>
 
 namespace Ui {
 class MainWindow;
@@ -21,24 +22,26 @@ public:
 
 private slots:
     void on_pushButton_clicked();
-
     void on_comboBox_currentIndexChanged(int index);
+    void on_listWidget_currentRowChanged(int currentRow);
 
-    void on_listWidget_itemClicked(QListWidgetItem *item);
-
-    void on_listWidget_clicked(const QModelIndex &index);
-
-    void on_listWidget_activated(const QModelIndex &index);
+    void on_pushButton_3_clicked();
 
     void on_pushButton_2_clicked();
 
 private:
-    QStandardItemModel *model;
-    MyOpenWorkbook <MySchoolboy> *excel;
-    MyOpenWorkbook <MySchool> *excel2;
+    QString schoolsFile;
+    QString reportsFolder;
+    MyOpenWorkbook <MySchoolboy> *excelBoys;
+    QVector < MySchool > schools;
     Ui::MainWindow *ui;
 
     void updateList(int index);
+    MySchool getSchoolByTags(QStringList tags);
+    QMap < QString , QString > prepareBoyForPrint(MySchoolboy boy);
+    void showReport(const MySchoolboy &boy);
+    void loadSchools();
+    void prepareReportsFolder();
 };
 
 #endif // MAINWINDOW_H
