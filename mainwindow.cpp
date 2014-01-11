@@ -157,7 +157,7 @@ void MainWindow::showReport(const MySchoolboy &boy)
     QMap < QString , QString > report =  prepareBoyForPrint(boy);
 
     ui->label->setText(report["tags"]);
-    ui->label_2->setText(report["school"]);
+    ui->label_2->setText(QString("Школа: \"%1\" (из %2)").arg(report["school"], QString::number(schools.size())));
     ui->lineEdit->setText(report["surname"]);
     ui->lineEdit_2->setText(report["name"]);
     ui->lineEdit_3->setText(report["middlename"]);
