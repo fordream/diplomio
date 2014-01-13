@@ -128,7 +128,7 @@ QMap<QString, QString> MainWindow::prepareBoyForPrint(MySchoolboy boy)
     MySchool school = getSchoolByTags(tags);
     QStringList lines = school.getTemplate().split("$");
 
-    result["school"] = school.toQString();
+    result["school"] = school.getSchool();
 
     while (lines.length() < 5)
         lines << "";
@@ -148,6 +148,8 @@ QMap<QString, QString> MainWindow::prepareBoyForPrint(MySchoolboy boy)
     result["day"] = subjectList[2];
     result["month"] = months[subjectList[3].toInt() - 1];
     result["year"] = subjectList[4];
+
+    result["locality"] = boy.getLocality();
 
     return result;
 }
@@ -273,4 +275,31 @@ void MainWindow::on_pushButton_2_clicked()
         if (item->checkState() == Qt::Checked)
             processSelectedBoyForPrint(excelBoys->getBoyFromTabData(ui->comboBox->currentIndex(), i));
     }
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    QFile file(QDir::currentPath() + "/" + ui->comboBox->currentText() + ".txt");
+    QVector < MySchoolboy > boys = excelBoys->getTabData(ui->comboBox->currentIndex());
+
+    file.open(QFile::WriteOnly | QFile::Truncate);
+
+    QTextStream stream(&file);
+
+    foreach (MySchoolboy boy, boys)
+    {
+        QMap < QString , QString > report = prepareBoyForPrint(boy);
+
+        stream << report["surname"] << " " << report["name"] << " "
+                                    << report["middlename"] << "\t" <<
+                                       report["locality"] << "\t" << report["school"] << "\t" << report["level"] << "\n";
+    }
+
+/*
+    foreach (MySchool school, schools)
+    {
+        stream << "1. " << school.getSchool() << "\n2. " << school.getLocality() << "\n3. " << school.getTemplate() << "\n\n";
+    }
+*/
+    file.close();
 }

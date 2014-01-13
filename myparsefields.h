@@ -13,7 +13,7 @@ class MyParseFields
 private:
     QString getSchoolName(QString text)
     {
-        text = text.replace("\"", " ").replace("«", " ").replace("»", " ");
+        text = text.replace("\"", " ").replace("«", " ").replace("»", " ").replace("ё", "е");
 
         QStringList leftWords;
         QStringList rightWords;
@@ -123,6 +123,7 @@ public:
         pairs["р-он"] = "район";
         pairs["р-н"] = "район";
         pairs[","] = " ";
+        pairs["ё"] = "е";
 
         for (QMap < QString , QString >::const_iterator it = pairs.constBegin(); it != pairs.constEnd(); ++it)
             myText = myText.replace(it.key(), it.value(), Qt::CaseInsensitive);
