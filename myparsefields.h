@@ -7,18 +7,19 @@
 #include <QMap>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QDebug>
 
 class MyParseFields
 {
 private:
     QString getSchoolName(QString text)
     {
-        text = text.replace("\"", " ").replace("«", " ").replace("»", " ").replace("ё", "е");
+        text = text.replace("\"", " ").replace("«", " ").replace("»", " ").replace("ё", "е").simplified();
 
         QStringList leftWords;
         QStringList rightWords;
 
-        leftWords << "МБОУ" << "МОБУ" << "МОУ" << "МКОУ" << "МАОУ";
+        leftWords << "МБОУ" << "МОБУ" << "МОУ" << "МКОУ" << "МАОУ" << "учреждение";
         rightWords << "СОШ" << "ООШ" << "средняя" << "гимназия" << "лицей" << "школа";
 
         QStringList words = text.split(" ");
@@ -26,14 +27,16 @@ private:
         if (words.length() < 3)
             return "";
 
-        if (leftWords.contains(words[0]) && rightWords.contains(words[2]))
+        for (int i = 0; i < words.size() - 2; ++i)
         {
-            QStringList tags = getTagsForSchool(words[2]);
+            if (leftWords.contains(words[i]) && rightWords.contains(words[i + 2]))
+            {
+                QStringList tags = getTagsForSchool(words[i + 2]);
 
-            if (tags.length() > 0 && tags[0] == "школа")
-                return words[1];
+                if (tags.length() > 0 && tags[0] == "школа")
+                    return words[i + 1];
+            }
         }
-
         return "";
     }
 
@@ -86,6 +89,7 @@ public:
 
         QMap < QString , QString > pairs;
 
+        pairs["средняя"] = "школа";
         pairs["ООШ"] = "школа";
         pairs["СОШ"] = "школа";
         pairs["школа"] = "школа";
@@ -101,7 +105,7 @@ public:
                 tags << it.value();
         }
 
-        QString schoolNumber = QRegularExpression("[№](\\s*)([0-9]+)").match(text).captured(2);
+        QString schoolNumber = QRegularExpression("[№](\\s*)([0-9]+)").match(text).captured(2); 
 
         if (schoolNumber != "")
             tags << "№ " + schoolNumber;
@@ -110,6 +114,8 @@ public:
 
         if (schoolName != "")
             tags << schoolName;
+
+        tags.removeDuplicates();
 
         return tags;
     }

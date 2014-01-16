@@ -41,6 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
     subjects << "экономике (08.02.2014)";
 
     ui->comboBox_2->addItems(subjects);
+
+    MyParseFields parse;
+
+    qDebug() << parse.getTagsForSchool("Муниципальное бюджетное общеобразовательное учреждение Абанская средняя общеобразовательная школа №4 им. Героя Советского Союза В.С. Богуцкого");
 }
 
 MainWindow::~MainWindow()
@@ -121,6 +125,8 @@ QMap<QString, QString> MainWindow::prepareBoyForPrint(MySchoolboy boy)
 
     tags = parse.getTagsForSchool(boy.getSchool());
     tags << parse.getTagForLocality(boy.getLocality());
+
+    tags.sort();
 
     foreach (QString tag, tags)
         result["tags"] += "[" + tag + "] ";
@@ -295,11 +301,23 @@ void MainWindow::on_pushButton_4_clicked()
                                        report["locality"] << "\t" << report["school"] << "\t" << report["level"] << "\n";
     }
 
-/*
+    stream << "\n---\n";
+
+    MyParseFields parse;
+
     foreach (MySchool school, schools)
     {
-        stream << "1. " << school.getSchool() << "\n2. " << school.getLocality() << "\n3. " << school.getTemplate() << "\n\n";
+        stream << "1. " << school.getSchool() << "\n2. " << school.getLocality() << "\n3. " << school.getTemplate() << "\n4. ";
+        QStringList items = parse.getTagsForSchool(school.getSchool()) << parse.getTagForLocality(school.getLocality());
+        items.sort();
+
+        foreach (QString item, items)
+        {
+            stream << "[" << item << "] ";
+        }
+
+        stream << "\n\n";
     }
-*/
+
     file.close();
 }
