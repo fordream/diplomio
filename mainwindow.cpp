@@ -154,8 +154,7 @@ QMap<QString, QString> MainWindow::prepareBoyForPrint(MySchoolboy boy)
     result["day"] = subjectList[2];
     result["month"] = months[subjectList[3].toInt() - 1];
     result["year"] = subjectList[4];
-
-    result["locality"] = boy.getLocality();
+    result["locality"] = school.getLocality();
 
     return result;
 }
@@ -298,7 +297,7 @@ void MainWindow::on_pushButton_4_clicked()
 
         stream << report["surname"] << " " << report["name"] << " "
                                     << report["middlename"] << "\t" <<
-                                       report["locality"] << "\t" << report["school"] << "\t" << report["level"] << "\n";
+                                       report["locality"] << "\t" << report["school"] << "\t\t" << report["level"] << "\n";
     }
 
     stream << "\n---\n";
