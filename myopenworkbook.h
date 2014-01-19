@@ -222,11 +222,8 @@ void MyOpenXlsx<T>::readSheet(const QString &fileName, int index)
     {
         if (elements[i].getAttr("t") == "s" && elements[i].getValue() != "")
         {
-            qDebug() << i << "of" << sharedStrings.size() << elements[i].getValue().toInt();
             if (elements[i].getValue().toInt() < sharedStrings.size())
                 elements[i].setValue(sharedStrings[elements[i].getValue().toInt()]);
-            else
-                qDebug() << "oops: " << elements[i].getValue().toInt() << "of" << sharedStrings.size();
         }
     }
 

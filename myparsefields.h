@@ -14,13 +14,13 @@ class MyParseFields
 private:
     QString getSchoolName(QString text)
     {
-        text = text.replace("\"", " ").replace("«", " ").replace("»", " ").replace("ё", "е").simplified();
+        text = text.replace("\"", " ").replace("«", " ").replace("»", " ").replace("\"", " ").replace("ё", "е").simplified();
 
         QStringList leftWords;
         QStringList rightWords;
 
         leftWords << "МБОУ" << "МОБУ" << "МОУ" << "МКОУ" << "МАОУ" << "учреждение";
-        rightWords << "СОШ" << "ООШ" << "средняя" << "гимназия" << "лицей" << "школа";
+        rightWords << "СОШ" << "ООШ" << "средняя" << "гимназия" << "лицей" << "школа" << "основная" << "образовательная" << "общеобразовательная";
 
         QStringList words = text.split(" ");
 
@@ -29,11 +29,16 @@ private:
 
         for (int i = 0; i < words.size() - 2; ++i)
         {
-            if (leftWords.contains(words[i]) && rightWords.contains(words[i + 2]))
+            if (leftWords.contains(words[i], Qt::CaseInsensitive) && rightWords.contains(words[i + 2], Qt::CaseInsensitive))
             {
-                QStringList tags = getTagsForSchool(words[i + 2]);
+                QString s;
 
-                if (tags.length() > 0 && tags[0] == "школа")
+                for (int j = i + 1; j < words.size(); ++j)
+                    s += words[j] + " ";
+
+                QStringList tags = getTagsForSchool(s);
+
+                if (tags.contains("школа", Qt::CaseInsensitive) && !leftWords.contains(words[i + 1], Qt::CaseInsensitive) && !rightWords.contains(words[i + 1], Qt::CaseInsensitive))
                     return words[i + 1];
             }
         }
@@ -149,6 +154,17 @@ public:
 
         if (words[0] == "город")
             return "город " + words[1];
+
+        for (int i = 0; i < words.size(); ++i)
+            if (words[i] == "район")
+            {
+                QString locality;
+
+                for (int j = 0; j < i; ++j)
+                    locality += words[j] + " ";
+
+                return locality + "район";
+            }
 
         if (words[1] == "район")
             return words[0] + " район";

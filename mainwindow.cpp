@@ -41,10 +41,6 @@ MainWindow::MainWindow(QWidget *parent) :
     subjects << "экономике (08.02.2014)";
 
     ui->comboBox_2->addItems(subjects);
-
-    MyParseFields parse;
-
-    qDebug() << parse.getTagsForSchool("Муниципальное бюджетное общеобразовательное учреждение Абанская средняя общеобразовательная школа №4 им. Героя Советского Союза В.С. Богуцкого");
 }
 
 MainWindow::~MainWindow()
