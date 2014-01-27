@@ -32,23 +32,7 @@ QVector < MyXmlTreeElement > MySimpleXmlReader::getItemsWithTag(const QString &t
     checkAllItems(result, root, MyCheckTag(tag));
     return result;
 }
-/*
-QVector < MyXmlTreeItem* > MySimpleXmlReader::getItemsWithTag(const QString &tag, MyXmlTreeItem *startItem = NULL)
-{
-    QVector < MyXmlTreeItem* > result;
 
-    checkAllItems(result, (startItem ? startItem : root), MyCheckTag(tag));
-    return result;
-}
-
-QVector < MyXmlTreeItem* > MySimpleXmlReader::getItemsWithAttr(const QString &key, const QString &value, MyXmlTreeItem *startItem = NULL)
-{
-    QVector < MyXmlTreeItem* > result;
-
-    checkAllItems(result, (startItem ? startItem : root), MyCheckAttr(key, value));
-    return result;
-}
-*/
 QVector < MyXmlTreeElement > MySimpleXmlReader::getElementsByPath(const QString &path)
 {
     QVector < MyXmlTreeElement > result;

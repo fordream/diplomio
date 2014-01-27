@@ -217,7 +217,6 @@ void MyOpenXlsx<T>::readSheet(const QString &fileName, int index)
     QVector < MyXmlTreeElement > elements = MySimpleXmlReader(tempDir.path() + fileName).getElementsByPath("/worksheet/sheetData/row/c/v");
     QVector < QPair < QString , QString > > fieldsCol(this->helper->getFieldsCount());
 
-    qDebug() << elements.size() << sharedStrings.size();
     for (int i = 0; i < elements.size(); ++i)
     {
         if (elements[i].getAttr("t") == "s" && elements[i].getValue() != "")
@@ -227,7 +226,6 @@ void MyOpenXlsx<T>::readSheet(const QString &fileName, int index)
         }
     }
 
-    qDebug() << "olo";
     for (int i = 0; i < elements.size(); ++i)
     {
         int field = this->helper->getFieldByFeature(elements[i].getValue());
