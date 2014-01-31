@@ -271,10 +271,12 @@ void MainWindow::on_pushButton_2_clicked()
 {
     for (int i = 0; i < ui->listWidget->count(); ++i)
     {
-        QListWidgetItem *item = ui->listWidget->item(i);
+        QListWidgetItem *item = ui->listWidget->item(i);        
 
-        if (item->checkState() == Qt::Checked)
-            processSelectedBoyForPrint(excelBoys->getBoyFromTabData(ui->comboBox->currentIndex(), i));
+        if (item->checkState() == Qt::Unchecked)
+            item->setCheckState(Qt::Checked);
+
+        processSelectedBoyForPrint(excelBoys->getBoyFromTabData(ui->comboBox->currentIndex(), i));
     }
 }
 
@@ -315,16 +317,4 @@ void MainWindow::on_pushButton_4_clicked()
     }
 
     file.close();
-}
-
-void MainWindow::on_pushButton_5_clicked()
-{
-    for (int i = 0; i < ui->listWidget->count(); ++i)
-    {
-        QListWidgetItem *item = ui->listWidget->item(i);
-
-        if (item->checkState() == Qt::Unchecked)
-            item->setCheckState(Qt::Checked);
-    }
-
 }
