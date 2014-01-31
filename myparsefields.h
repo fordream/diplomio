@@ -103,6 +103,9 @@ public:
         pairs["КУГ"] = "гимназия";
         pairs["МУК"] = "МУК";
         pairs["ЦО"] = "ЦО";
+        pairs["школа-интернат"] = "школа-интернат";
+        pairs["ОШи"] = "школа-интернат";
+        pairs["СОО"] = "школа";
 
         for (QMap < QString , QString >::const_iterator it = pairs.constBegin(); it != pairs.constEnd(); ++it)
         {
