@@ -65,6 +65,8 @@ void MySimpleXmlReader::getElementsByPathRec(QVector < MyXmlTreeElement > &resul
                 {
                     if (!currentElement.findAttr(it.key()))
                         currentElement.pushAttr(it.key(), it.value());
+
+                    currentElement.prependToAttr("ufo", QString::number((long long int)item));
                 }
             }
 

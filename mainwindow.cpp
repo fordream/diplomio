@@ -34,8 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     subjects << "химии (31.01.2014)";
     subjects << "физической культуре (01.02.2014)";
     subjects << "информатике и ИКТ (03.02.2014)";
-    subjects << "математике (05.02.2014)";
-    subjects << "экологии (07.02.2014)";
+    subjects << "математике (06.02.2014)";
+    subjects << "экологии (06.02.2014)";
     subjects << "немецкому языку (07.02.2014)";
     subjects << "технологии (08.02.2014)";
     subjects << "экономике (08.02.2014)";
@@ -64,6 +64,7 @@ void MainWindow::on_pushButton_clicked()
     features[3] << "Класс";
 
     excelBoys = new MyOpenXlsx < MySchoolboy > (QFileDialog::getOpenFileName(this, "Файл итогового протокола", QDir::currentPath(), "Microsoft Excel 2010 (*.xlsx)"), new MyOpenWorkbookHelper<MySchoolboy>(features));
+//    excelBoys = new MyOpenOds < MySchoolboy > (QFileDialog::getOpenFileName(this, "Файл итогового протокола", QDir::currentPath(), "Microsoft Excel 2010 (*.ods)"), new MyOpenWorkbookHelper<MySchoolboy>(features));
 
     ui->listWidget->setEnabled(true);
     ui->comboBox->setEnabled(true);

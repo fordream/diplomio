@@ -7,6 +7,12 @@
 #include <myschoolboy.h>
 #include <qdebug.h>
 
+#include "myopenworkbook.h"
+#include <QTemporaryDir>
+#include <QProcess>
+#include "mysimplexmlreader.h"
+#include <QPair>
+
 template < class T >
 class MyOpenWorkbookHelper
 {
@@ -122,12 +128,224 @@ public:
     void readSharedStrings(const QString &fileName);
 };
 
+template < class T >
+class MyOpenOds: public MyOpenWorkbook<T>
+{
+private:
+    QTemporaryDir tempDir;
+    QVector < QString > sharedStrings;
+
+    void extractFile();
+
+public:
+    MyOpenOds(const QString &fileName_, MyOpenWorkbookHelper < T > *helper_);
+    ~MyOpenOds();
+
+    T getBoyFromTabData(int index, int row) const;
+    QVector < T > getTabData(int index) const;
+    int getTabsCount() const;
+    QStringList getTabNames() const;
+    void readContentTypes();
+//    void readWorkBook(const QString &fileName, QStringList sheetsFileName);
+//    void readSheet(const QString &fileName, int index);
+//    void readSharedStrings(const QString &fileName);
+};
+
+/***********1*/
+template < class T >
+MyOpenOds<T>::MyOpenOds(const QString &fileName_, MyOpenWorkbookHelper < T > *helper_):
+    MyOpenWorkbook<T>(fileName_, helper_)
+{
+    extractFile();
+    readContentTypes();
+}
+
+template < class T >
+MyOpenOds<T>::~MyOpenOds()
+{
+}
+
+template < class T >
+void MyOpenOds<T>::extractFile()
+{
+    QString program("unzip");
+    QStringList arguments;
+
+    arguments << this->fileName;
+    arguments << "-d";
+    arguments << tempDir.path();
+
+    QProcess *process = new QProcess();
+
+    process->execute(program, arguments);
+
+    delete process;
+}
+
+template < class T >
+void MyOpenOds<T>::readContentTypes()
+{
+
+    /*
+    QString stringSharedStrings("application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml");
+    QString stringWorkbook("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml");
+    QString stringSheet("application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml");
+
+    QVector < MyXmlTreeElement > elements = MySimpleXmlReader(tempDir.path() + "/[Content_Types].xml").getElementsByPath("/Types/Override");
+
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        if (elements[i].getAttr("ContentType") == stringWorkbook)
+        {
+            QStringList sheets;
+
+            for (int j = 0; j < elements.size(); ++j)
+                if (elements[j].getAttr("ContentType") == stringSheet)
+                    sheets << elements[j].getAttr("PartName");
+
+            readWorkBook(elements[i].getAttr("PartName"), sheets);
+            continue;
+        }
+
+        if (elements[i].getAttr("ContentType") == stringSharedStrings)
+        {
+            readSharedStrings(elements[i].getAttr("PartName"));
+            continue;
+        }
+    }*/
+
+    qDebug() << "ok";
+    QVector < MyXmlTreeElement > elements = MySimpleXmlReader(tempDir.path() + "/content.xml").getElementsByPath("/office:document-content/office:body/office:spreadsheet/table:table/table:table-row/table:table-cell/text:p");
+
+    qDebug() << elements.size();
+
+    foreach (MyXmlTreeElement e, elements)
+    {
+        qDebug() << e.getValue();
+
+        for (QMap < QString , QString >::const_iterator it = e.getAttrs().constBegin(); it != e.getAttrs().constEnd(); ++it)
+        {
+            qDebug() << "    " << it.key() << "=" << it.value();
+        }
+    }
+}
+/*
+template < class T >
+void MyOpenXlsx<T>::readWorkBook(const QString &fileName, QStringList sheetsFileName)
+{
+    sheetsFileName.sort();
+
+    QVector < MyXmlTreeElement > elements = MySimpleXmlReader(tempDir.path() + fileName).getElementsByPath("/workbook/sheets/sheet");
+
+    for (int i = 0; i < elements.size(); ++i)
+        this->tabNames << " ";
+
+    this->data.resize(elements.size());
+
+    foreach (MyXmlTreeElement e, elements)
+    {
+        int index = e.getAttr("sheetId").toInt() - 1;
+
+        this->tabNames[index] = e.getAttr("name");
+        readSheet(sheetsFileName[index], index);
+    }
+}
+
+template < class T >
+void MyOpenXlsx<T>::readSheet(const QString &fileName, int index)
+{
+    QVector < MyXmlTreeElement > elements = MySimpleXmlReader(tempDir.path() + fileName).getElementsByPath("/worksheet/sheetData/row/c/v");
+    QVector < QPair < QString , QString > > fieldsCol(this->helper->getFieldsCount());
+
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        if (elements[i].getAttr("t") == "s" && elements[i].getValue() != "")
+        {
+            if (elements[i].getValue().toInt() < sharedStrings.size())
+                elements[i].setValue(sharedStrings[elements[i].getValue().toInt()]);
+        }
+    }
+
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        int field = this->helper->getFieldByFeature(elements[i].getValue());
+
+        if (field != -1)
+        {
+            if (fieldsCol[field].first == "")
+            {
+                fieldsCol[field] = QPair < QString , QString >(elements[i].getValue(), elements[i].getAttr("r"));
+
+                bool f = true;
+
+                for (int j = 0; j < fieldsCol.size(); ++j)
+                    if (fieldsCol[j] == QPair < QString , QString >())
+                    {
+                        f = false;
+                        break;
+                    }
+
+                if (f)
+                    break;
+            }
+        }
+    }
+
+    for (int i = 0; i < fieldsCol.size(); ++i)
+        if (fieldsCol[i].first == "" || fieldsCol[i].second == "")
+            return;
+
+    QVector < T > boys;
+
+    foreach (MyXmlTreeElement e, elements)
+    {
+        for (int i = 0; i < fieldsCol.size(); ++i)
+            if (this->getColOfCell(fieldsCol[i].second) == this->getColOfCell(e.getAttr("r")))
+            {
+                if (this->getRowOfCell(fieldsCol[i].second) == this->getRowOfCell(e.getAttr("r")))
+                    continue;
+
+                int row = this->getRowOfCell(e.getAttr("r")) - 1;
+
+                if (boys.size() <= row)
+                    boys.resize(row + 1);
+
+                boys[row].setField(i, e.getValue());
+            }
+    }
+
+    foreach (T boy, boys)
+        if (this->helper->isComplete(boy))
+            this->data[index].push_back(boy);
+}
+*/
+template < class T >
+int MyOpenOds<T>::getTabsCount() const
+{
+    return this->tabNames.size();
+}
+
+template < class T >
+QStringList MyOpenOds<T>::getTabNames() const
+{
+    return this->tabNames;
+}
+
+template < class T >
+QVector < T > MyOpenOds<T>::getTabData(int index) const
+{
+    return this->data[index];
+}
+
+
+template < class T >
+T MyOpenOds<T>::getBoyFromTabData(int index, int row) const
+{
+    return this->data[index][row];
+}
+
+/***********2*/
 /*******************/
-#include "myopenworkbook.h"
-#include <QTemporaryDir>
-#include <QProcess>
-#include "mysimplexmlreader.h"
-#include <QPair>
 
 template < class T >
 MyOpenXlsx<T>::MyOpenXlsx(const QString &fileName_, MyOpenWorkbookHelper < T > *helper_):
